@@ -10,6 +10,7 @@ class BlueWhale extends Entity {
         this.spriteX = 0
         this.spriteY = 6
         this.hsp = 1
+        this.name = "blue whale"
     }
 
     collidingWithMap(x, y) {
@@ -38,7 +39,6 @@ class BlueWhale extends Entity {
         }
 
         if (this.collidingWithMap(sideToCheck + this.hsp, this.hb.top)) {
-            debugger
             this.hsp = -this.hsp
         }
         this.x += this.hsp

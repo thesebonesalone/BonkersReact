@@ -9,6 +9,7 @@ class Raptor extends Entity {
         this.movesWithKeysCheck = false
         this.spriteX = 0
         this.spriteY = 2
+        this.name = "Raptor"
     }
 
     loop(){

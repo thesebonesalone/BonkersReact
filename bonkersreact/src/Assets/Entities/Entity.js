@@ -21,8 +21,14 @@ class Entity {
     this.spriteSheet.setAttribute("hidden", true);
     this.animatesWithMovements = true;
     this.movesWithKeysCheck = true;
+    this.name = "basic entity"
+    this.cb = {}
     document.getElementById("sheet-holder").appendChild(this.spriteSheet);
   }
+  clicked(){
+    console.log(this.name)
+  }
+
   bindCamera() {
     let cameraX = this.x - parseInt(this.canvas.dataset.camerawidth) / 2 + 8;
     let cameraY = this.y - parseInt(this.canvas.dataset.cameraheight) / 2 + 8;
@@ -123,6 +129,12 @@ class Entity {
   setProps(props) {
     this.keys = props.keys;
     this.count = props.count;
+    this.cb= {
+      left: this.x,
+      right: this.x + 16,
+      top: this.y,
+      bottom: this.y + 16
+    }
   }
 
   loop() {

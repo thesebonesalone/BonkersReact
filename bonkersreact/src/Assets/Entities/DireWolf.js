@@ -9,6 +9,7 @@ class DireWolf extends Entity {
         this.movesWithKeysCheck = false
         this.spriteX = 0
         this.spriteY = 4
+        this.name = "Direwolf"
     }
 
     loop(){
