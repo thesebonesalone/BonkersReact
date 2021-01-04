@@ -3,6 +3,9 @@ import Entity from "../Assets/Entities/Entity";
 import Player from "../Assets/Entities/Player"
 import TileDraw from "./TileDraw";
 import TileSet from "../Assets/TileSet.png";
+import Raptor from "../Assets/Entities/Raptor";
+import DireWolf from "../Assets/Entities/DireWolf";
+import BlueWhale from "../Assets/Entities/BlueWhale";
 function Engine() {
   const [mounted, setMounted] = useState(false);
   let map = [
@@ -242,7 +245,7 @@ function Engine() {
       setMounted(true);
       camera = document.getElementById("camera-canvas");
       cameraCtx = camera.getContext("2d");
-      entityLoop = { 0: new Entity(setProps(), 64, 48) };
+      entityLoop = { 0: new Player(setProps(), 64, 48), 1: new Raptor(setProps(), 16,16), 2: new DireWolf(setProps(),65,48), 3: new BlueWhale(setProps(),80,152)};
       mainCanvas = document.getElementById("window-canvas");
       mainCtx = mainCanvas.getContext("2d");
       tileMap.draw();
