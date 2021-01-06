@@ -10,20 +10,32 @@ class BlueWhale extends Entity {
         this.spriteX = 0
         this.spriteY = 6
         this.hsp = 1
-        this.name = "blue whale"
+        this.name = "Blue Whale"
     }
 
     collidingWithMap(x, y) {
         let tileX = Math.floor(x / 16);
         let tileY = Math.floor(y / 16);
         let truth = false;
-        if (this.map[tileY][tileX] != 58) {
+        if (this.map[tileY][tileX] !== 58) {
           truth = true;
         }
         return truth;
       }
+      setProps(props){
+        this.keys = props.keys;
+        this.count = props.count;
+          this.cb= {
+            left: this.x,
+            right: this.x + 32,
+            top: this.y,
+            bottom: this.y + 16
+          }
+      }
+
 
     loop(){
+        
         this.hb = {
             left: this.x,
             right: this.x + 32,

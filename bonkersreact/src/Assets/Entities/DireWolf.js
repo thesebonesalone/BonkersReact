@@ -12,6 +12,17 @@ class DireWolf extends Entity {
         this.name = "Direwolf"
     }
 
+    setProps(props){
+        this.keys = props.keys;
+        this.count = props.count;
+          this.cb= {
+            left: this.x,
+            right: this.x + 32,
+            top: this.y,
+            bottom: this.y + 16
+          }
+      }
+
     loop(){
         this.hb = {
             left: this.x,

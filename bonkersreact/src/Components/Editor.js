@@ -1,5 +1,6 @@
 import TileSet from "../Assets/TileSet.png"; //Add your preffered TileSet here
 import React, { useState, useEffect } from "react";
+import Urlis from '../Assets/Urlis'
 
 function Editor() {
   const [mouseX, setMouseX] = useState(0); //mouse coordinates in the map
@@ -14,6 +15,8 @@ function Editor() {
   const [drawFirstBuffer, setDrawFirstBuffer] = useState(true); //sees if buffer has been drawn to yet, if not it builds the scene array and draws the grid to the buffer
   const [sceneArray, setSceneArray] = useState([[0]]); //the output array of the scene
   const canvasWidth = 1000; //defines the size of the canvas in the window. Resize as needed for styling
+  const [entityLoad,setEntityLoad] = useState("")
+  const [exitLoad, setExitLoad] = useState("")
 
   useEffect(() => {
     if (tileWidth < 1) {
@@ -113,6 +116,38 @@ function Editor() {
       16
     );
   }
+  function postMap(){
+    let newTiles = '['
+    for (let i = 0; i < sceneArray.length; i ++){
+      newTiles += "["
+      for (let j = 0; j < sceneArray[i].length; j ++){
+        newTiles += `${sceneArray[i][j]},`
+      }
+      newTiles += "],"
+    }
+    newTiles += "]"
+    console.log(newTiles)
+
+    let data = {map: {
+      tiles: newTiles,
+      entities: entityLoad,
+      exits: exitLoad
+    }}
+    let reqObj = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }
+    fetch(Urlis + '/map/create', reqObj)
+    .then(resp => resp.json())
+    .then(message => console.log(message))
+  }
+
+
+
+
   if (rendered) {
     const mainCanvas = document.getElementById("main-canvas");
     const ctx = mainCanvas.getContext("2d");
@@ -121,6 +156,7 @@ function Editor() {
     const tileCanvas = document.getElementById("tile-canvas");
     const tctx = tileCanvas.getContext("2d");
     const image = document.getElementById("tile-set");
+    
     ctx.fillStyle = "red";
     ctx.drawImage(bufferCanvas, 0, 0, canvasWidth, canvasWidth);
     tctx.drawImage(image, 0, 0, canvasWidth / 2, canvasWidth / 2);
@@ -189,11 +225,26 @@ function Editor() {
     newString += "]";
     return newString;
   }
+  function handleEntityChange(e){
+    setEntityLoad(e.target.value)
+  }
+  function handleExitsChange(e){
+    setExitLoad(e.target.value)
+  }
+  function handleMapSubmit(e){
+    e.preventDefault()
+    postMap()
+  }
+
 
   return (
     <div>
       <h2>Editor</h2>
       <h3>Current Tile {`${tileX}, ${tileY}`}</h3>
+      <h3>
+        Mouse X: {Math.floor((mouseX / canvasWidth) * tileWidth * 16)}, Mouse Y:{" "}
+        {Math.floor((mouseY / canvasWidth) * tileHeight * 16)}
+      </h3>
       <form>
         <input
           type="number"
@@ -210,21 +261,32 @@ function Editor() {
           onChange={(e) => handleTileChange(e)}
         ></input>
       </form>
-      <div className="container-fluid">
-        <canvas
-          id="main-canvas"
-          onMouseMove={(e) => handleMouseMove(e)}
-          onClick={(e) => handleMapClick(e)}
-        ></canvas>
-        <canvas id="buffer-canvas" hidden="true"></canvas>
-        <img id="tile-set" src={TileSet} hidden="true"></img>
-        <canvas
-          id="tile-canvas"
-          onMouseMove={(e) => handleTileMove(e)}
-          onClick={(e) => handleTileClick(e)}
-        ></canvas>
+      <div className="container">
+        <div className="row">
+          <div className="col-">
+            <canvas
+              id="main-canvas"
+              onMouseMove={(e) => handleMouseMove(e)}
+              onClick={(e) => handleMapClick(e)}
+            ></canvas>
+          </div>
+          <canvas id="buffer-canvas" hidden="true"></canvas>
+          <img id="tile-set" src={TileSet} hidden="true"></img>
+          <div className="col-">
+            <form onSubmit={(e) => handleMapSubmit(e)}>
+              <textarea placeholder="Input Entity Loop Here" value={entityLoad} onChange={(e) => handleEntityChange(e)}></textarea>
+              <textarea placeholder="Define Exits Here" value={exitLoad} onChange={(e) => handleExitsChange(e)}></textarea>
+              <input type="submit" value="Save Map"></input>
+            </form>
+            <canvas
+              id="tile-canvas"
+              onMouseMove={(e) => handleTileMove(e)}
+              onClick={(e) => handleTileClick(e)}
+            ></canvas>{" "}
+            <input type="text" value={sceneArrayBuilder()} />
+          </div>
+        </div>
       </div>
-      <input type="text" value={sceneArrayBuilder()} />
     </div>
   );
 }

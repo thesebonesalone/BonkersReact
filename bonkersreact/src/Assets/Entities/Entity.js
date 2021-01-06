@@ -21,7 +21,7 @@ class Entity {
     this.spriteSheet.setAttribute("hidden", true);
     this.animatesWithMovements = true;
     this.movesWithKeysCheck = true;
-    this.name = "basic entity"
+    this.name = "Basic Entity"
     this.cb = {}
     document.getElementById("sheet-holder").appendChild(this.spriteSheet);
   }

@@ -5,7 +5,7 @@ import SpriteSheet from "../PlayerSpriteSheet.png";
 class Player extends Entity {
     constructor(props,x,y){
         super(props,x,y)
-        this.name = "player"
+        this.name = "Player"
 
     }
   

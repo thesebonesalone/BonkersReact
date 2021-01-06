@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { Component, useState, useEffect, useRef } from "react";
 import Entity from "../Assets/Entities/Entity";
 import Player from "../Assets/Entities/Player";
 import TileDraw from "./TileDraw";
@@ -6,147 +6,34 @@ import TileSet from "../Assets/TileSet.png";
 import Raptor from "../Assets/Entities/Raptor";
 import DireWolf from "../Assets/Entities/DireWolf";
 import BlueWhale from "../Assets/Entities/BlueWhale";
+import Urlis from "../Assets/Urlis";
+import Exit from "../Assets/Exits/Exit";
 function Engine() {
   const [mounted, setMounted] = useState(false);
   const [mouseDownTime, setMouseDownTime] = useState(0);
-  const [clickedThing, setClickedThing] = useState("Nada");
-  let map = [
-    [
-      29,
-      28,
-      29,
-      28,
-      29,
-      28,
-      29,
-      28,
-      29,
-      28,
-      29,
-      21,
-      55,
-      22,
-      26,
-      26,
-      26,
-      26,
-      26,
-      26,
-    ],
-    [
-      28,
-      29,
-      28,
-      29,
-      21,
-      20,
-      21,
-      20,
-      21,
-      20,
-      21,
-      4,
-      55,
-      22,
-      26,
-      26,
-      26,
-      26,
-      26,
-      26,
-    ],
-    [29, 21, 20, 21, 1, 2, 2, 2, 3, 4, 4, 4, 55, 30, 26, 26, 26, 26, 26, 26],
-    [21, 4, 4, 4, 8, 9, 6, 6, 7, 4, 4, 4, 55, 6, 6, 6, 6, 6, 6, 6],
-    [19, 4, 35, 36, 37, 4, 5, 6, 7, 25, 25, 25, 55, 9, 9, 9, 9, 9, 9, 6],
-    [21, 4, 43, 44, 45, 4, 5, 6, 7, 33, 40, 33, 55, 4, 50, 4, 4, 4, 4, 5],
-    [19, 4, 33, 41, 33, 4, 8, 9, 10, 4, 11, 4, 16, 63, 13, 63, 63, 39, 4, 5],
-    [
-      21,
-      4,
-      4,
-      11,
-      11,
-      11,
-      11,
-      11,
-      11,
-      11,
-      11,
-      11,
-      30,
-      26,
-      13,
-      26,
-      26,
-      55,
-      2,
-      6,
-    ],
-    [19, 4, 4, 4, 38, 63, 63, 63, 63, 63, 39, 11, 4, 4, 11, 1, 2, 55, 6, 6],
-    [21, 4, 1, 2, 54, 58, 58, 58, 58, 58, 55, 11, 11, 11, 11, 5, 6, 55, 6, 6],
-    [4, 4, 5, 6, 54, 58, 58, 58, 58, 58, 55, 2, 3, 11, 1, 6, 6, 55, 6, 6],
-    [2, 2, 6, 6, 46, 62, 62, 62, 15, 58, 55, 6, 7, 11, 5, 6, 6, 16, 63, 63],
-    [6, 6, 6, 6, 7, 4, 49, 49, 54, 58, 55, 9, 10, 11, 5, 6, 6, 22, 26, 26],
-    [9, 9, 9, 9, 10, 4, 49, 49, 46, 62, 47, 4, 4, 11, 8, 9, 9, 30, 26, 26],
-    [15, 4, 4, 4, 4, 4, 4, 4, 42, 42, 42, 42, 4, 11, 42, 42, 42, 42, 42, 42],
-    [54, 4, 4, 4, 18, 19, 4, 4, 42, 4, 48, 27, 4, 11, 51, 34, 52, 53, 18, 19],
-    [54, 4, 4, 18, 29, 21, 4, 4, 42, 48, 48, 4, 4, 11, 59, 60, 60, 61, 20, 28],
-    [54, 4, 18, 29, 28, 19, 4, 4, 42, 4, 4, 4, 4, 11, 32, 40, 32, 32, 18, 29],
-    [
-      54,
-      18,
-      29,
-      28,
-      29,
-      28,
-      19,
-      18,
-      19,
-      18,
-      19,
-      18,
-      19,
-      11,
-      11,
-      11,
-      4,
-      4,
-      20,
-      28,
-    ],
-    [
-      54,
-      20,
-      28,
-      29,
-      28,
-      29,
-      28,
-      29,
-      28,
-      29,
-      28,
-      29,
-      28,
-      19,
-      18,
-      19,
-      18,
-      19,
-      18,
-      29,
-    ],
-  ];
+  const [clickedThing, setClickedThing] = useState("Loading...");
+  const playerCoord = useRef({ x: 64, y: 48 });
+  const loaded = useRef(false);
+  const tileMap = useRef(null);
+  const loading = useRef(false);
+  const moveRight = useRef(false);
+  const moveLeft = useRef(false);
+  const moveDown = useRef(false);
+  const moveUp = useRef(false);
+  const mapNumber = useRef(1);
+  const map = useRef([]);
+  const entityLoop = useRef({});
+  const exitLoop = useRef({});
+  const loopInterval = useRef(null);
   let up = false;
   let down = false;
   let left = false;
   let right = false;
   let action = false;
-  let entityLoop = {};
+
   let count = 0;
   let mainCanvas = null;
   let mainCtx = null;
-  let tileMap = new TileDraw(map);
   let cameraX = 0;
   let cameraY = 0;
   let camera = null;
@@ -161,12 +48,14 @@ function Engine() {
   document.addEventListener("mouseup", (e) => handleMouseUp(e));
 
   function setProps() {
+    let camera = document.getElementById("camera-canvas");
+    let cameraCtx = camera.getContext("2d");
     return {
       keys: { up: up, down: down, left: left, right: right, action: action },
       count: count,
       canvas: camera,
       ctx: cameraCtx,
-      map: map,
+      map: map.current,
     };
   }
 
@@ -222,17 +111,28 @@ function Engine() {
     mainCtx.fillRect(0, 0, 640, 480);
   }
   function loop() {
-    tileMap.drawBuffer();
+    tileMap.current.drawBuffer();
     count += 1;
-    for (const entity in entityLoop) {
-      entityLoop[entity].setProps(setProps());
+    for (const entity in entityLoop.current) {
+      entityLoop.current[entity].setProps(setProps());
       // entity.loop()
     }
-    for (const entity in entityLoop) {
-      entityLoop[entity].loop();
+    for (const entity in entityLoop.current) {
+      entityLoop.current[entity].loop();
     }
-    for (const entity in entityLoop) {
-      entityLoop[entity].draw();
+    for (const entity in entityLoop.current) {
+      entityLoop.current[entity].draw();
+    }
+    for (const exit in exitLoop.current) {
+      let player = entityLoop.current[0];
+      exitLoop.current[exit].setProps({
+        player: player,
+        moveMaps: () =>
+          moveMaps(exitLoop.current[exit].goTo, exitLoop.current[exit].kind),
+      });
+    }
+    for (const exit in exitLoop.current) {
+      exitLoop.current[exit].loop();
     }
     mainCtx.drawImage(
       camera,
@@ -255,6 +155,36 @@ function Engine() {
       3
     );
   }
+
+  function moveMaps(goTo, kind) {
+    clearInterval(loopInterval.current);
+    console.log("callback is working.");
+    // debugger
+    setClickedThing("loading..");
+    playerCoord.current = {x: entityLoop.current[0].x, y: entityLoop.current[0].y}
+    mapNumber.current = goTo;
+    tileMap.current = null;
+    setMounted(false);
+    map.current = [];
+    loading.current = false;
+    entityLoop.current = {};
+    exitLoop.current = {};
+    switch (kind) {
+      case "right":
+        moveRight.current = true;
+        break;
+      case "left":
+        moveLeft.current = true;
+        break;
+      case "up":
+        moveUp.current = true;
+        break;
+      case "down":
+        moveDown.current = true;
+        break;
+    }
+  }
+
   function handleMouseMove(e) {
     let offset = e.target.getBoundingClientRect();
     let newMouseX = Math.floor(
@@ -270,25 +200,144 @@ function Engine() {
     // debugger
   }
   useEffect(() => {
-    if (mounted === false) {
+    if (mounted === false && map.current.length > 0) {
       console.log("moving");
-      setInterval(() => loop(), 16.66);
+      loopInterval.current = setInterval(() => loop(), 16.66);
       blankScreen();
       setMounted(true);
       camera = document.getElementById("camera-canvas");
       cameraCtx = camera.getContext("2d");
-      entityLoop = {
-        0: new Player(setProps(), 64, 48),
-        1: new Raptor(setProps(), 16, 16),
-        2: new DireWolf(setProps(), 65, 48),
-        3: new BlueWhale(setProps(), 80, 152),
-      };
+
       mainCanvas = document.getElementById("window-canvas");
       mainCtx = mainCanvas.getContext("2d");
-      tileMap.draw();
+      tileMap.current.draw();
+    }
+    if (map.current.length === 0 && loading.current === false) {
+      loading.current = true;
+      fetch(Urlis + "/map/show/" + `${mapNumber.current}`)
+        .then((resp) => resp.json())
+        .then((newMap) => {
+          let brandNew = newMap.tiles.split("[").filter((string) => {
+            return string !== "";
+          });
+          let newMapReturn = [];
+          let count = 0;
+          for (const string in brandNew) {
+            newMapReturn[count] = brandNew[string]
+              .split(",")
+              .filter((s) => {
+                return s !== "";
+              })
+              .filter((s) => {
+                return s !== "]";
+              })
+              .map((s) => {
+                return parseInt(s);
+              });
+            count += 1;
+          }
+          map.current = newMapReturn;
+          tileMap.current = new TileDraw(map.current);
+          console.log(newMap.entities);
+          function asyncEntities(entities) {
+            let count = 0;
+            let newEntities = entities.split("\n");
+            let emptyEntities = [];
+            for (const index in newEntities) {
+              let entity = newEntities[index].split(" ");
+              switch (entity[0]) {
+                case "Direwolf":
+                  console.log(map.current);
+                  // debugger
+                  emptyEntities[index] = new DireWolf(
+                    setProps(),
+                    parseInt(entity[1]),
+                    parseInt(entity[2])
+                  );
+                  break;
+                case "Bluewhale":
+                  emptyEntities[index] = new BlueWhale(
+                    setProps(),
+                    parseInt(entity[1]),
+                    parseInt(entity[2])
+                  );
+                  break;
+                case "Raptor":
+                  emptyEntities[index] = new Raptor(
+                    setProps(),
+                    parseInt(entity[1]),
+                    parseInt(entity[2])
+                  );
+                  break;
+              }
+            }
+            let currentX
+            let currentY
+            if (entityLoop.length > 0){
+              currentX = entityLoop.current[0].x
+              currentY = entityLoop.current[0].y
+            } else {
+              currentX = playerCoord.current.x
+              currentY = playerCoord.current.y
+            }
+
+            entityLoop.current = {
+              0: new Player(
+                setProps(),
+                currentX,
+                currentY
+              ),
+            };
+
+            playerCoord.current = {x: currentX, y: currentY}
+            if (moveRight.current){
+              // debugger
+              entityLoop.current[0].x = 8
+              entityLoop.current[0].y = currentY
+              moveRight.current = false
+            }
+            if (moveLeft.current){
+              entityLoop.current[0].x = tileMap.current.width - 24
+              entityLoop.current[0].y = currentY
+              moveLeft.current = false
+            }
+            if (moveUp.current){
+              entityLoop.current[0].y = tileMap.current.height - 24
+              entityLoop.current[0].x = currentX
+              moveUp.current = false
+            }
+            if (moveDown.current){
+              entityLoop.current[0].y = 8
+              entityLoop.current[0].x = currentX
+              moveDown.current = false
+            }
+            for (const index in emptyEntities) {
+              entityLoop.current[parseInt(index) + 1] =
+                emptyEntities[parseInt(index)];
+            }
+          }
+          exitLoop.current = {}
+          function asyncExits(exits) {
+            let lines = exits.split('\n')
+            for (const index in lines) {
+              let commands = lines[index].split(' ')
+              exitLoop.current[index] = new Exit({}, commands[0], commands[1], commands[2], commands[3], commands[4], commands[5])
+              
+            }
+          }
+
+          function loadCallback(entities) {
+            setTimeout(() => asyncEntities(entities), 16);
+            setTimeout(() => asyncExits(newMap.exits), 16);
+            setClickedThing("Nada");
+          }
+
+          setTimeout(() => loadCallback(newMap.entities), 200);
+        });
     }
   });
   function handleMouseDown(e) {
+    console.log(entityLoop.current);
     const mainCanvas = document.getElementById("window-canvas");
     const camera = document.getElementById("camera-canvas");
     if (mouseDownTime === 0) {
@@ -302,8 +351,8 @@ function Engine() {
       mouseY = mouseY * diffH;
       mouseX = parseInt(mouseX) + parseInt(camera.dataset.x);
       mouseY = parseInt(mouseY) + parseInt(camera.dataset.y);
-      for (const entity in entityLoop) {
-        let e = entityLoop[entity];
+      for (const entity in entityLoop.current) {
+        let e = entityLoop.current[entity];
         if (
           mouseX >= e.cb.left &&
           mouseX <= e.cb.right &&
@@ -320,38 +369,51 @@ function Engine() {
     setMouseDownTime(0);
   }
 
+  function RenderPlayArea() {
+    return (
+      <React.Fragment>
+        <div
+          className="full-screen"
+          id="main-screen"
+          width="100%"
+          height="100%"
+        >
+          <canvas
+            data-mousex="0"
+            data-mousey="0"
+            height="240"
+            width="320"
+            id="window-canvas"
+            style={{ width: "100%", height: "100%" }}
+            onMouseMove={(e) => handleMouseMove(e)}
+          ></canvas>
+          <canvas
+            height={tileMap.current.height}
+            width={tileMap.current.width}
+            id="buffer-canvas"
+            hidden={true}
+          />
+          <canvas
+            data-X={0}
+            data-Y={0}
+            data-cameraWidth={cameraWidth}
+            data-cameraHeight={cameraHeight}
+            height={tileMap.current.height}
+            width={tileMap.current.width}
+            id="camera-canvas"
+            hidden={true}
+          />
+          <img src={TileSet} id="tile-set" hidden={true} />
+          <div id="sheet-holder"></div>
+        </div>
+      </React.Fragment>
+    );
+  }
+
   return (
     <React.Fragment>
-      <h2>{clickedThing}</h2>
-      <div className="full-screen" id="main-screen" width="100%" height="100%">
-        <canvas
-          data-mousex="0"
-          data-mousey="0"
-          height="240"
-          width="320"
-          id="window-canvas"
-          style={{ width: "100%", height: "100%" }}
-          onMouseMove={(e) => handleMouseMove(e)}
-        ></canvas>
-        <canvas
-          height={tileMap.height}
-          width={tileMap.width}
-          id="buffer-canvas"
-          hidden={true}
-        />
-        <canvas
-          data-X={0}
-          data-Y={0}
-          data-cameraWidth={cameraWidth}
-          data-cameraHeight={cameraHeight}
-          height={tileMap.height}
-          width={tileMap.width}
-          id="camera-canvas"
-          hidden={true}
-        />
-        <img src={TileSet} id="tile-set" hidden={true} />
-        <div id="sheet-holder"></div>
-      </div>
+      <h2>{clickedThing !== "Nada" ? clickedThing : "Nothing is Clicked"}</h2>
+      {tileMap.current !== null ? RenderPlayArea() : null}
     </React.Fragment>
   );
 }
