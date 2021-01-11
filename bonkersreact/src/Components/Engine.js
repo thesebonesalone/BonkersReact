@@ -134,6 +134,7 @@ function Engine() {
     for (const exit in exitLoop.current) {
       exitLoop.current[exit].loop();
     }
+    mainCtx.translate(0.5,0.5)
     mainCtx.drawImage(
       camera,
       parseInt(camera.dataset.x),
@@ -154,13 +155,12 @@ function Engine() {
       3,
       3
     );
+    mainCtx.translate(-0.5,-0.5)
   }
 
   function moveMaps(goTo, kind) {
     clearInterval(loopInterval.current);
-    console.log("callback is working.");
-    // debugger
-    setClickedThing("loading..");
+    setClickedThing("loading...");
     playerCoord.current = {x: entityLoop.current[0].x, y: entityLoop.current[0].y}
     mapNumber.current = goTo;
     tileMap.current = null;
@@ -217,6 +217,7 @@ function Engine() {
       fetch(Urlis + "/map/show/" + `${mapNumber.current}`)
         .then((resp) => resp.json())
         .then((newMap) => {
+          //If you want to create a default map, this is the place
           let brandNew = newMap.tiles.split("[").filter((string) => {
             return string !== "";
           });
@@ -238,17 +239,15 @@ function Engine() {
           }
           map.current = newMapReturn;
           tileMap.current = new TileDraw(map.current);
-          console.log(newMap.entities);
           function asyncEntities(entities) {
-            let count = 0;
             let newEntities = entities.split("\n");
             let emptyEntities = [];
             for (const index in newEntities) {
               let entity = newEntities[index].split(" ");
               switch (entity[0]) {
+                // Add any new Entity creation to this loop
+
                 case "Direwolf":
-                  console.log(map.current);
-                  // debugger
                   emptyEntities[index] = new DireWolf(
                     setProps(),
                     parseInt(entity[1]),
@@ -322,7 +321,6 @@ function Engine() {
             for (const index in lines) {
               let commands = lines[index].split(' ')
               exitLoop.current[index] = new Exit({}, commands[0], commands[1], commands[2], commands[3], commands[4], commands[5])
-              
             }
           }
 
@@ -375,8 +373,8 @@ function Engine() {
         <div
           className="full-screen"
           id="main-screen"
-          width="100%"
-          height="100%"
+          width="50%"
+          height="50%"
         >
           <canvas
             data-mousex="0"
@@ -384,7 +382,7 @@ function Engine() {
             height="240"
             width="320"
             id="window-canvas"
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: "50%", height: "50%" }}
             onMouseMove={(e) => handleMouseMove(e)}
           ></canvas>
           <canvas

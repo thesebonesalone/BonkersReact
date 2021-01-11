@@ -6,8 +6,8 @@ function App() {
   return (
     <div className="App">
       {/* <Editor/> */}
-      <div className="center" style={{ width: "70%" }}>
-        <div width="50%">
+      <div className="center" style={{ width: "100%" }}>
+        <div width="100%">
           <Engine />
         </div>
       </div>

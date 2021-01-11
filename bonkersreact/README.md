@@ -1,70 +1,73 @@
-# Getting Started with Create React App
+Welcome to Bonkers React! A React based game engine that uses a Rails backend!
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is very much in the Alpha stage so many features are missing, but here's a run down of what's included!
 
-## Available Scripts
+The Map Editor.
 
-In the project directory, you can run:
+Everything here is stored in the Editor component. To access it please uncoment the Editor in App.js, and comment out Engine.
 
-### `yarn start`
+This is where you will define the maps you see in the game and how they will be traversed. At the moment there is no Edit prior maps function, so what you make is what you make. Be sure to be careful about what you commit to the database!
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+You will immediately see some useful data on the top of the screen, including the coordinates of the current tile you have selected in the tile selector, the coordinates of the mouse x and mouse y and the width and height in tiles of the current map.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+You can click on a tile in the tile selection area and it will select a tile to use on the map screen. By clicking the map screen you place that tile. You can change the width and height of the tilemap by directly inputting a new height or width, but it’s recommended to adjust the height and width with the arrow on the inputs. By doing it this way you will preserve the map you are currently working on.
 
-### `yarn test`
+You will see two text input fields with the placeholder texts “Input Entity Loop Here” and “Define Exits Here” respectively. The first is where you tell the game which entities to load on any given map, the second is where you define how the player will exit the map. These follow very rigid syntax so please read the next section carefully.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+When inputting an Entity the format is as such.
+	Entityname X Y
+	
+In other words you would spawn a Bluewhale at the coordinates of 32, 32  by typing the following
 
-### `yarn build`
+	Bluewhale 32 32
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+If you want to add another entity simply press enter after the Y coordinate.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Exits are slightly trickier. The syntax is as follows.
+	
+	X Y Height Width GoToMapID Direction
+If you wanted to place an exit at the top of the map, that sends the player up to the map with an ID of 2 you would type the following.
+	
+	16 0 2 32 2 up
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+You can add multiple exits by pressing enter after the direction.
 
-### `yarn eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+The Engine.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+This is what's actively running the Game Logic. At the moment the game is fitted with a very basic top down player view, you can use WASD to move and click on the different entities to find out their names.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Working on the engine is built to be pretty simple. To create a new Entity create a file in ./Assets/Entities and add the following code.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+import React, { useState, useEffect } from "react"
+import Entity from "./Entity"
+import SpriteSheet from "../PlayerSpriteSheet.png"
 
-## Learn More
+class ((CREATE A CLASS NAME HERE)) extends Entity {
+    constructor(props, x, y){
+        super(props,x,y)
+        this.name=((ENTIY NAME))
+    }
+}
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+export default ((CLASS NAME))
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
+this will create a standard entity that can be added to a map.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Each entity has a few built in boolean variables that can be set in the constructor to help easily change some built in behavior.
 
-### Analyzing the Bundle Size
+setting this.movesWithKeysCheck to true in the constructor you can move the entity with the movement keys
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+setting this.bindCamera to entity to true makes the camera follow the player. If two entities have this value as true the camera will follow whichever entity was loaded in last.
 
-### Making a Progressive Web App
+setting this.animatesWithMovements to true will make the character animate in the standard way.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
-### Advanced Configuration
+Each Entity has a few lifecycle methods that will be called each frame.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+setProps() is where information from the engine will be passed to the Entity. Information is passed as an object and more info can be added in that object to keep your entities up to speed.
 
-### Deployment
+loop() is where all game logic is stored. Any calculations about the entity should be made here.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `yarn build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+draw() is where the entity is drawn to the buffer. This is the final method called in each frame and should not be used for game logic.
